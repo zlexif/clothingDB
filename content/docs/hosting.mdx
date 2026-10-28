@@ -1,0 +1,35 @@
+---
+title: Hosting
+description: Serve the pictures from your own storage with one setting.
+---
+
+Every address on the site comes from one setting. Copy the pictures to your own
+storage using the same folders, point that setting at it, and the whole site
+switches over. Nothing else changes.
+
+<Steps>
+  <Step>
+    ### Copy the pictures
+
+    Keep the folder layout: `{kind}/{gender}/{slot}/{item}/{colour}.webp`, where
+    kind is `garment` or `ped`. Creator Lab ZIPs use the `{gender}/…` part, so they
+    drop straight into either folder.
+  </Step>
+  <Step>
+    ### Point the site at your copy
+
+    Set `WAKU_PUBLIC_CDN_BASE` to the folder that holds `garment` and `ped`, for
+    example `https://pictures.your-server.com/clothingdb`.
+  </Step>
+  <Step>
+    ### Rebuild
+
+    Every address in the Directory, the homepage and the docs now uses your
+    storage.
+  </Step>
+</Steps>
+
+<Callout type="warn" title="Keep addresses stable">
+  Browsers and apps cache pictures for a long time. Once you publish an address, do not
+  move or rename the file behind it.
+</Callout>

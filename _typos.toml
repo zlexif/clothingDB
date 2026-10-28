@@ -1,0 +1,25 @@
+[files]
+extend-exclude = [
+  "node_modules/",
+  "dist/",
+  "dist-check/",
+  "dist-cf/",
+  ".wrangler/",
+  "previews/",
+  ".source/",
+  "bin/",
+  "obj/",
+  ".agents/",
+  ".claude/",
+  "bun.lock",
+  "skills-lock.json",
+  "src/lib/manifest-data.json",
+  "src/lib/chroma.ts",
+  "public/",
+  "*.svg",
+]
+
+[default.extend-words]
+LOD = "LOD"
+metalness = "metalness"
+als = "als"

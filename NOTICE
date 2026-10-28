@@ -1,0 +1,18 @@
+clothingDB by Aura Development
+Copyright (c) 2026 Aura Development
+
+This product includes software developed by third parties:
+
+------------------------------------------------------------------------
+uz_AutoShot
+https://github.com/uz-scripts/uz_AutoShot
+Copyright uz-scripts
+Licensed under the Apache License, Version 2.0
+http://www.apache.org/licenses/LICENSE-2.0
+
+Used in: src/lib/chroma.ts
+Adapted from resources/src/lib/shot.js: the chroma keying, despill,
+feathering and centre-crop routines (keyness, removeChromaKey, centreCrop).
+Modified: ported to TypeScript and reworked to run on ImageData with
+configurable settings.
+------------------------------------------------------------------------

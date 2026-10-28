@@ -1,0 +1,33 @@
+name: Links
+
+on:
+  pull_request:
+    paths: ["**/*.md", "**/*.mdx"]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --cache --max-cache-age 1d
+            --exclude-path node_modules
+            --exclude-path dist
+            './**/*.md' './**/*.mdx'
+          fail: ${{ github.event_name == 'pull_request' }}
+      - if: github.event_name == 'schedule' && env.lychee_exit_code != 0
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: Broken links found
+          content-filepath: ./lychee/out.md
+          labels: docs
