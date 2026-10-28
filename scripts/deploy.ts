@@ -28,7 +28,8 @@ const env = {
   WAKU_DIST_DIR: distDir,
   WAKU_PUBLIC_SITE_ENV: target,
   WAKU_PUBLIC_SITE_URL: `https://${domain}`,
-  WAKU_PUBLIC_PEDS_BASE: process.env.WAKU_PUBLIC_PEDS_BASE ?? 'https://cdn.auradevelopment.xyz/clothingdb/peds',
+  WAKU_PUBLIC_CDN_BASE: 'https://cdn.auradevelopment.xyz/clothingdb',
+  WAKU_PUBLIC_PEDS_BASE: 'https://cdn.auradevelopment.xyz/clothingdb/peds',
 };
 
 const run = (cmd: string, cmdArgs: string[]) => {
