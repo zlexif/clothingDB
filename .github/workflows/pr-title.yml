@@ -39,6 +39,8 @@ jobs:
             ui
             deps
           requireScope: false
+          ignoreLabels: |
+            dependencies
           subjectPattern: ^(?![A-Z]).+[^.]$
           subjectPatternError: |
             The summary "{subject}" should start lowercase and have no trailing period.
