@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import type { UserConfig } from 'vite';
@@ -9,6 +10,12 @@ export default defineConfig({
     plugins: [tailwindcss(), fumadocsMdx()],
     resolve: {
       tsconfigPaths: true,
+      alias: [
+        {
+          find: /^fflate$/,
+          replacement: fileURLToPath(new URL('./node_modules/fflate/esm/browser.js', import.meta.url)),
+        },
+      ],
     },
   } satisfies UserConfig as Config['vite'],
 });
