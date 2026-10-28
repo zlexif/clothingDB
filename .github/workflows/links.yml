@@ -20,6 +20,7 @@ jobs:
         with:
           args: >-
             --no-progress
+            --base-url https://clothingdb-staging.auradevelopment.xyz
             --cache --max-cache-age 1d
             --exclude-path node_modules
             --exclude-path dist
