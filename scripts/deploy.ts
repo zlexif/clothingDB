@@ -48,6 +48,8 @@ writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
 mkdirSync('.wrangler/deploy', { recursive: true });
 writeFileSync('.wrangler/deploy/config.json', JSON.stringify({ configPath: `../../${configPath}` }));
 
-if (dry) run('bunx', ['wrangler', 'deploy', '--dry-run']);
-else if (preview) run('bunx', ['wrangler', 'versions', 'upload', '--preview-alias', preview]);
-else run('bunx', ['wrangler', 'deploy']);
+const wrangler = (...rest: string[]) => run('node', ['node_modules/wrangler/bin/wrangler.js', ...rest]);
+
+if (dry) wrangler('deploy', '--dry-run');
+else if (preview) wrangler('versions', 'upload', '--preview-alias', preview);
+else wrangler('deploy');
