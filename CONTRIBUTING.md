@@ -45,6 +45,19 @@ bun run check   # typecheck, lint, tests and production build, the same as CI
   raw colours.
 - Never commit `.env`, keys, exported game files or rendered pictures.
 
+## Deploying
+
+The site runs on Cloudflare Workers. GitHub Actions handles every deploy:
+
+| When                                | Where it goes                                                                     |
+| ----------------------------------- | --------------------------------------------------------------------------------- |
+| A pull request is opened or updated | A preview link, posted as a comment on the pull request                           |
+| CI passes on `main`                 | Staging, at `clothingdb-staging.auradevelopment.xyz` (hidden from search engines) |
+| A `v*` release is published         | Production, at `clothingdb.auradevelopment.xyz`                                   |
+
+To deploy by hand, log in once with `node node_modules/wrangler/bin/wrangler.js login`, then run
+`bun run deploy staging`. Add `--dry` to build and check the bundle without uploading.
+
 ## Docs
 
 Docs pages are MDX files in `content/docs/`. Add the page name to
