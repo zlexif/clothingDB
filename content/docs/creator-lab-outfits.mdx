@@ -1,0 +1,106 @@
+---
+title: Dress the ped
+description: Choose a ped, put clothes on and take them off, pick items and colours, and move around the stage.
+---
+
+Everything on this page happens in the left column and on the stage. Nothing is
+saved until you press **Capture view** or **Capture range**, so try anything.
+
+## Choose the ped
+
+The **Ped** switch at the top of the left column swaps between the male and
+female ped.
+
+<Callout type="warn" title="Switching starts a fresh outfit">
+  The male and female peds have their own clothes, numbered separately: male
+  top 12 and female top 12 are different items. Switching the ped resets the
+  outfit to the plain starting one.
+</Callout>
+
+## The outfit list
+
+Each row in **Outfit** is one clothing slot:
+
+| Row | What it is |
+| --- | --- |
+| Tops / Jackets | Shirts, jackets, hoodies: the outer layer |
+| Undershirts | What shows under an open jacket |
+| Torsos | The arms and hands. Pair this with the top (see below) |
+| Legs | Trousers, shorts, skirts |
+| Shoes | Footwear |
+| Masks | Masks and face coverings |
+| Hair | Hairstyles |
+| Accessories | Chains, ties, scarves |
+| Armor | Vests |
+| Bags | Backpacks and parachutes |
+| Decals | Badges and logos printed on clothes |
+
+A row with nothing worn shows a **Wear** button. Press it to put item 0 of that
+slot on the ped. A worn row shows two counters and an **×** that takes the item
+off again.
+
+### The two counters
+
+- The **left counter** picks the item. Use **−** and **+**, or click the number
+  and type one.
+- The **right counter** picks the colour or pattern of that item.
+- The line underneath shows how many items the slot has and how many colours the
+  current item has, for example `of 628 drawables, 16 textures`. "Drawable" is
+  the game's word for an item and "texture" its word for a colour. They are the
+  same numbers the Directory and the picture addresses use.
+
+When you change the item, the colour goes back to 0, because every item has its
+own number of colours. You cannot go past the last item or colour; the counter
+stops there.
+
+<Callout title="Arms look wrong?">
+  In GTA the arms and hands are a separate part (Torsos) that has to match the
+  top. If arms poke through a jacket, or sleeves show bare skin where there
+  should be cloth, change the **Torsos** number until it fits. Short sleeves,
+  long sleeves and gloves each need a different torso.
+</Callout>
+
+### Empty items
+
+A few numbers in some slots are empty in the game itself: invisible
+placeholders such as "no top" or "no mask". Picking one shows nothing on the
+ped. That is the game, not a bug. Step past it with **+**.
+
+## Move around the stage
+
+- **Drag** on the stage to turn the ped.
+- **Scroll** to zoom in and out.
+
+This only changes your view while you look around. Pictures use the **Angle**
+and **Framing** settings under the stage, so you get the same shot every time.
+See [Frame and save a picture](/docs/creator-lab-pictures).
+
+## Open an item straight from the Directory
+
+Every item in the [Directory](/browse) has a **Try it on** link. It opens the
+Creator Lab with:
+
+- the right ped already chosen,
+- that item and colour on the ped,
+- **Only the garment** pointed at that slot,
+- and **Batch capture** set to that item.
+
+You can build the same link yourself. The address takes the slot, item, colour
+and ped:
+
+```txt
+/creator?slot=tops&d=245&t=0&g=male
+```
+
+`d` is the item number, `t` the colour, and `g` is `male` or `female`. Only the
+11 studio slots work here.
+
+## Real-time tips
+
+- Build the full outfit first, then turn on **Only the garment** to shoot each
+  piece. The outfit stays as it is, so turning the switch off brings everything
+  back.
+- Jackets look best over a matching **Undershirt** and **Torsos**. Try a few
+  combinations with the ped turned to ¾ before you take the picture.
+- The stage keeps the last item while the next one loads. If a picture looks
+  like the previous item, wait a moment for the new model to appear.

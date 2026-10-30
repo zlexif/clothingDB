@@ -1,0 +1,51 @@
+---
+title: Use cases
+description: Where the pictures fit, with the address to use for each.
+---
+
+Every picture is a plain image address, so it works anywhere an image does. Use
+`garment` when you want the piece on its own, and `ped` when you want it worn.
+
+## Clothing stores
+
+Show each item and its colours in an in-game shop. Use the `garment` picture for
+the item tile and switch the colour number as players pick one.
+
+```txt
+.../garment/male/tops/245/0.webp
+```
+
+## Appearance and character editors
+
+Show what a piece looks like worn while players build their look. The `ped`
+picture has the same address with `ped` in place of `garment`.
+
+```txt
+.../ped/male/tops/245/0.webp
+```
+
+## Inventory icons
+
+Clothing that can be taken off and carried needs an icon. The `garment` picture
+is see-through, so it sits on any slot background.
+
+## Outfits and wardrobes
+
+A saved outfit is a list of slot, item and colour numbers. Turn each one into an
+address to show the outfit piece by piece.
+
+## Websites and wikis
+
+List your server's clothing on a website or wiki so players can browse it
+without the game. The [slot reference](/docs/slots) has every slot's name and
+item count.
+
+## Discord bots
+
+Put an address in an embed's image or thumbnail field. Discord loads it
+directly, nothing to upload.
+
+## Your own pictures
+
+Need a different angle, a ped wearing a full outfit, or pictures of your own
+clothes? Take them in the [Creator Lab](/docs/creator-lab).

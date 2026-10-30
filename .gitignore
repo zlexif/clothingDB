@@ -1,0 +1,15 @@
+node_modules/
+dist/
+dist-check/
+dist-cf/
+.wrangler/
+previews/
+scripts/make-previews.ts
+.env
+*.local
+.agents/
+.claude/
+skills-lock.json
+.vscode/
+Thumbs.db
+*.log

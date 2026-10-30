@@ -1,0 +1,68 @@
+---
+title: Picture addresses
+description: A few parts make every address, and an address never changes.
+---
+
+Every picture has a fixed address built from the kind of picture, male or female, the
+slot, the item number and the colour.
+
+```txt
+https://cdn.auradevelopment.xyz/clothingdb/{kind}/{gender}/{slot}/{item}/{colour}.webp
+```
+
+| Part   | What it is                                   | Example   |
+| ------ | -------------------------------------------- | --------- |
+| Kind   | `garment` for the piece on its own, `ped` for it worn by the ped | `garment` |
+| Gender | `male` or `female`                           | `male`    |
+| Slot   | The category's name in the address           | `tops`    |
+| Item   | The item's number in that slot               | `245`     |
+| Colour | Which colour of the item, from 0             | `0`       |
+
+So male top 245 in its first colour is:
+
+```txt
+https://cdn.auradevelopment.xyz/clothingdb/garment/male/tops/245/0.webp
+```
+
+and the same top worn by the ped is:
+
+```txt
+https://cdn.auradevelopment.xyz/clothingdb/ped/male/tops/245/0.webp
+```
+
+<Callout title="Addresses never change">
+  When the game adds clothes, new items go at the end of each slot. The numbers
+  you already use stay where they are, so a link you saved keeps working.
+  Browsers are told to keep each picture for a year.
+</Callout>
+
+## Using a picture
+
+Put the address in an image tag, in a game UI, a website or anything else that shows pictures. There is nothing to download or install.
+
+<Tabs items={['HTML', 'React']}>
+  <Tab value="HTML">
+    ```html
+    <img src="https://cdn.auradevelopment.xyz/clothingdb/garment/male/tops/245/0.webp" alt="Top 245" />
+    ```
+  </Tab>
+  <Tab value="React">
+    ```tsx
+    const picture = (gender: string, slot: string, item: number, colour: number, kind = 'garment') =>
+      `https://cdn.auradevelopment.xyz/clothingdb/${kind}/${gender}/${slot}/${item}/${colour}.webp`;
+
+    <img src={picture('male', 'tops', 245, 0)} alt="Top 245" />;
+    ```
+  </Tab>
+</Tabs>
+
+## Finding the right numbers
+
+- The [Directory](/browse) lists every item with all of its colours, as the
+  piece on its own or worn by the ped.
+- **Find any picture** on the homepage takes an item number directly.
+- Item and colour numbers are the ones the game uses, so 245 here is item 245 in
+  the game.
+- A few numbers in some slots are empty in the game itself (an invisible
+  placeholder, like "no top"). They have no picture and are left out of the
+  Directory.

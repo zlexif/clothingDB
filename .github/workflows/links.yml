@@ -1,0 +1,53 @@
+name: Links
+
+on:
+  pull_request:
+    paths: ["**/*.md", "**/*.mdx"]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check repo Markdown
+        id: repo
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --cache --max-cache-age 1d
+            --exclude-path node_modules
+            --exclude-path dist
+            './**/*.md'
+          output: ./lychee/repo.md
+          fail: false
+      - name: Check docs pages
+        id: docs
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --cache --max-cache-age 1d
+            --base-url https://clothingdb-staging.auradevelopment.xyz
+            './content/docs/**/*.mdx'
+          output: ./lychee/docs.md
+          fail: false
+      - name: Fail on broken links
+        if: github.event_name == 'pull_request' && (steps.repo.outputs.exit_code != 0 || steps.docs.outputs.exit_code != 0)
+        run: |
+          cat lychee/repo.md lychee/docs.md
+          exit 1
+      - name: Open an issue for broken links
+        if: github.event_name == 'schedule' && (steps.repo.outputs.exit_code != 0 || steps.docs.outputs.exit_code != 0)
+        run: |
+          cat lychee/repo.md lychee/docs.md > lychee/all.md
+          gh issue create --title "Broken links found" --body-file lychee/all.md --label docs || gh issue create --title "Broken links found" --body-file lychee/all.md
+        env:
+          GH_TOKEN: ${{ github.token }}

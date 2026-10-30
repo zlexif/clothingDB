@@ -1,0 +1,90 @@
+---
+title: Batch capture
+description: Photograph a whole range of items in every colour and download one ZIP, sorted like the picture addresses.
+---
+
+**Batch capture** photographs many items in a row without you pressing anything.
+It shoots every colour of every item in the range and hands you one ZIP at the
+end.
+
+## Run a batch
+
+<Steps>
+  <Step>
+    ### Set up the look first
+
+    Choose the ped, the backdrop, the angle, the size and the format. The batch
+    uses all of them. Turn **Only the garment** on for item-only pictures, or off
+    to keep the whole ped and the rest of the outfit in every shot.
+  </Step>
+  <Step>
+    ### Pick the slot
+
+    Choose it in the **Slot** list. The number next to each slot is how many items
+    it has for the current ped.
+  </Step>
+  <Step>
+    ### Pick the range
+
+    Set **From drawable** and **To drawable** to the first and last item number.
+    Both are included. The line under them shows how many pictures that will be:
+    every colour of every item in the range.
+  </Step>
+  <Step>
+    ### Press Capture range
+
+    A bar on the stage counts the pictures as they are taken. **Stop** cancels
+    the batch at any time.
+  </Step>
+  <Step>
+    ### Get the ZIP
+
+    When the batch finishes, or you press Stop, your browser downloads
+    `clothingDB-male-tops.zip` with every picture taken so far.
+  </Step>
+</Steps>
+
+## What is in the ZIP
+
+The files are laid out exactly like the picture addresses:
+
+```txt
+male/tops/0/0.webp
+male/tops/0/1.webp
+male/tops/1/0.webp
+…
+```
+
+That is `{ped}/{slot}/{item}/{colour}`, the same order as a picture address, so
+every file is easy to match to its item in the Directory.
+
+## How big a batch gets
+
+Every item has its own number of colours, so a range can hold far more pictures
+than items. Some examples for the male ped:
+
+| Range | Items | Pictures |
+| --- | --- | --- |
+| Tops 0 to 9 | 10 | 156 |
+| Tops 0 to 99 | 100 | 627 |
+| Every top | 622 | 4,798 |
+
+How fast it goes depends on your computer and graphics card. Check the picture
+count under the range before you start a big one.
+
+<Callout type="warn" title="Keep the tab in front">
+  Browsers slow down tabs you are not looking at. Leave the Creator Lab visible
+  while a batch runs, or it may pause until you come back.
+</Callout>
+
+## Tips
+
+- Run big slots in chunks of a few hundred items. If something goes wrong, you
+  only redo one chunk.
+- The outfit you had before the batch comes back when it ends, so you can keep
+  working.
+- Empty placeholder items still get pictures, which come out blank. That is
+  expected: the game ships them empty.
+- The pictures on the clothingDB CDN were made the same way, with the same
+  settings: Only the garment, Clear, 512px, WebP. A batch with those settings
+  matches them exactly.

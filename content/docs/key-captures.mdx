@@ -1,0 +1,98 @@
+---
+title: Key captures
+description: Remove the green or magenta background from your own in-game screenshots, number them and export them like the CDN.
+---
+
+**Key captures** is the second tab of the Creator Lab. It is for pictures you
+took yourself in the game, for example of your server's own clothing, which the
+Ped studio cannot load. It removes the solid background, frames the clothing,
+names each picture and exports them in the same layout as the CDN.
+
+Everything runs on your computer. Your screenshots are never uploaded.
+
+## Take the screenshots in game
+
+<Steps>
+  <Step>
+    ### Stand in front of a solid colour
+
+    Use a plain **green** or **magenta** background that fills the whole
+    picture behind the clothing. Use magenta for green clothes and green for
+    everything else.
+  </Step>
+  <Step>
+    ### Light it evenly
+
+    Avoid strong shadows on the background. The more even the colour, the
+    cleaner the edges.
+  </Step>
+  <Step>
+    ### Name the files (optional)
+
+    If a file name contains the ped, slot, item and colour, the Lab reads them
+    for you. Any of these work:
+
+    ```txt
+    male_tops_245_0.png
+    female-shoes-12-3.png
+    male tops 1 0.jpg
+    ```
+
+    The slot must be its name in the address, like `tops` or `hats`. See the
+    [Slot reference](/docs/slots).
+  </Step>
+</Steps>
+
+## Key them
+
+<Steps>
+  <Step>
+    ### Drop the files in
+
+    Open [/creator](/creator), switch to **Key captures**, and drop your
+    screenshots on the page, or click to pick them. PNG, JPG and WebP work.
+  </Step>
+  <Step>
+    ### Check each one
+
+    Click a capture in the list to see the result. The **Preview backdrop**
+    buttons show it on a checkerboard, black, white or the site's art, so you
+    can spot leftover edges.
+  </Step>
+  <Step>
+    ### Name it
+
+    Under **This capture**, set the **Ped**, **Slot**, **Drawable** (item) and
+    **Texture** (colour). A small picture shows what the CDN has under that name
+    today, so you can check you numbered it right.
+
+    Files without a readable name are numbered for you: each new one continues
+    from the last, one colour higher.
+  </Step>
+  <Step>
+    ### Export
+
+    **Download this one** saves the current capture. **Export as ZIP** saves all
+    of them as `clothingDB-captures.zip`, laid out as `{ped}/{slot}/{item}/{colour}`
+    like the CDN.
+  </Step>
+</Steps>
+
+## Settings
+
+These apply to every capture and update the previews as you change them.
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| **Backdrop colour** | Auto | Which colour to remove. Auto detects green or magenta per picture |
+| **Edge feather** | 2px | How soft the cut-out edge is. Raise it if edges look jagged |
+| **Feather passes** | 2 | How many times the edge is softened. More passes, smoother edges |
+| **Framing** | Fit garment | **Fit garment** crops to the clothing; **Centre crop** keeps the middle of the screenshot |
+| **Padding** | 8% | Space around the clothing when framing is Fit garment |
+| **Size** | 512px | The finished picture is square, 256, 512 or 1024 pixels |
+| **Format** | WebP | WebP or PNG. Both keep the see-through background |
+
+<Callout title="Green fringe on the edges?">
+  Raise **Edge feather** a little, or switch **Backdrop colour** from Auto to the
+  colour you used. If the clothing itself is green, retake it on magenta.
+</Callout>
