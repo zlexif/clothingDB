@@ -64,6 +64,14 @@ anywhere an image goes: game UIs, websites, wikis, Discord bots.
     <td width="50%"><img src=".github/assets/colours.jpg" alt="Every colour, its own picture"></td>
     <td width="50%"><img src=".github/assets/use-cases.jpg" alt="One picture set, many uses"></td>
   </tr>
+  <tr>
+    <td width="50%"><img src=".github/assets/custom-clothing.jpg" alt="Your own clothing in the Creator Lab"></td>
+    <td width="50%"><img src=".github/assets/custom-drop.jpg" alt="Drop it in, wear it"></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src=".github/assets/custom-colours.jpg" alt="Every colour of your piece, in one ZIP"></td>
+    <td width="50%"><img src=".github/assets/custom-worn.jpg" alt="Your clothing, on the real ped"></td>
+  </tr>
 </table>
 
 <p align="center">
@@ -74,7 +82,7 @@ anywhere an image goes: game UIs, websites, wikis, Discord bots.
 
 ### Directory
 
-Browse all 28 slots for both peds. Find any item by its number, see every
+Browse all 28 slots, for male and female. Find any item by its number, see every
 colour, switch between the piece on its own and the piece worn, and copy its
 picture address in one click.
 
@@ -96,6 +104,14 @@ and female ped from the game:
   full body, upper, lower, feet or head framing; 256 to 1024 pixels; WebP or PNG.
 - **Batch capture** photographs a whole range of items in every colour and
   hands you one ZIP, laid out like the picture addresses.
+- **Your own clothing**: drop in a clothing model (.ydd) and its textures (.ytd),
+  put it on the ped and photograph it like the game's own clothing, every colour
+  in one ZIP. Files are read in the browser and never uploaded. Escrowed
+  (encrypted) clothing cannot be opened outside FiveM, so it is turned away.
+
+<p align="center">
+  <img src=".github/assets/custom-clothing-demo.gif" alt="Adding a hoodie to the Creator Lab, wearing it and switching its colours" width="100%">
+</p>
 
 ### Key captures
 
@@ -299,5 +315,6 @@ or endorsed by Rockstar Games or Take-Two Interactive.
   [uz_AutoShot](https://github.com/uz-scripts/uz_AutoShot) (Apache-2.0). See
   [NOTICE](NOTICE).
 - Game files are read with [CodeWalker](https://github.com/dexyfex/CodeWalker).
+- The hoodie in the custom clothing previews is the Amiri MA Hoodie by xqwore.
 
 <p align="center"><sub>Made by <a href="https://auradevelopment.xyz">Aura Development</a> for the FiveM community.</sub></p>
