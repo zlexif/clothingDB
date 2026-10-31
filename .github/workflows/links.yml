@@ -36,6 +36,7 @@ jobs:
             --no-progress
             --cache --max-cache-age 1d
             --base-url https://clothingdb-staging.auradevelopment.xyz
+            --remap '^https://clothingdb-staging\.auradevelopment\.xyz/docs/([a-z0-9-]+)$ file://${{ github.workspace }}/content/docs/$1.mdx'
             './content/docs/**/*.mdx'
           output: ./lychee/docs.md
           fail: false
