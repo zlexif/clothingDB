@@ -42,6 +42,34 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'your-own-clothing',
+    when: 'Oct 31, 2026',
+    version: '1.1.0',
+    areas: ['Creator Lab'],
+    title: 'Your own clothing in the Creator Lab',
+    summary: 'Add clothing files from your computer, put them on the real ped and photograph them like the game’s own.',
+    changes: [
+      {
+        kind: 'new',
+        text: 'Add a clothing model (.ydd) and its textures (.ytd) by dropping them in, or a whole folder. The ped and slot are read from the file names, and you can change them.',
+      },
+      {
+        kind: 'new',
+        text: 'Wear your piece, switch between its colours and use Only the garment, backdrops, angles and Capture view as with any game item.',
+      },
+      { kind: 'new', text: 'Photograph every colour of your piece and get one ZIP back.' },
+      {
+        kind: 'new',
+        text: 'Your files are read in your browser and never uploaded. Escrowed (encrypted) clothing only opens inside FiveM, so it is turned away with an explanation.',
+      },
+      { kind: 'new', text: 'A new docs page, Your own clothing, walks through adding and photographing a piece.' },
+      {
+        kind: 'fixed',
+        text: 'Batch capture now waits until the ped shows each item and colour, so a picture can no longer catch the previous colour.',
+      },
+    ],
+  },
+  {
     id: 'release',
     when: 'Oct 30, 2026',
     version: '1.0.0',
