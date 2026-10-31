@@ -26,6 +26,7 @@ const DOC_PAGES = [
   { href: '/docs/slots', label: 'Slot reference' },
   { href: '/docs/creator-lab', label: 'Using the Creator Lab' },
   { href: '/docs/creator-lab-batch', label: 'Batch capture' },
+  { href: '/docs/creator-lab-custom', label: 'Add your own clothing' },
   { href: '/docs/key-captures', label: 'Key captures' },
 ];
 

@@ -4,12 +4,19 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { Gender } from '../../lib/clothing';
+import type { ClothingMesh, ClothingTexture } from '../../lib/rage';
 
 export const PEDS_BASE = import.meta.env?.WAKU_PUBLIC_PEDS_BASE ?? '/peds';
 
 export interface SlotPick {
   drawable: number;
   texture: number;
+  custom?: string;
+}
+
+export interface CustomPiece {
+  mesh: ClothingMesh;
+  textures: ClothingTexture[];
 }
 
 export interface PedManifest {
@@ -41,6 +48,7 @@ export interface PedViewportHandle {
   capture: (size: number, type?: string) => Promise<Blob>;
   ready: () => Promise<void>;
   has: (slug: string) => boolean;
+  showing: (slug: string) => string;
   paint: (slug: string, overlay: OverlayPaint) => Promise<boolean>;
 }
 
@@ -53,6 +61,7 @@ export interface OverlayPaint {
 export function PedViewport({
   gender,
   outfit,
+  customs = {},
   backdrop,
   framing,
   yaw,
@@ -62,6 +71,7 @@ export function PedViewport({
 }: {
   gender: Gender;
   outfit: Record<string, SlotPick | null>;
+  customs?: Record<string, CustomPiece>;
   backdrop: StudioBackdrop;
   framing: Framing;
   yaw: number;
@@ -75,12 +85,13 @@ export function PedViewport({
     scene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
     ped: THREE.Group;
-    slots: Map<string, { key: string; obj: THREE.Object3D }>;
+    slots: Map<string, { key: string; obj: THREE.Object3D; texture?: number }>;
     pending: Set<Promise<void>>;
     orbit: { yaw: number; pitch: number; zoom: number };
     frame: () => void;
     render: () => void;
     painted?: THREE.CanvasTexture;
+    customTextures: Map<string, THREE.Texture>;
   } | null>(null);
 
   useEffect(() => {
@@ -177,6 +188,7 @@ export function PedViewport({
       orbit,
       frame,
       render,
+      customTextures: new Map(),
     };
 
     onReady?.({
@@ -265,6 +277,10 @@ export function PedViewport({
         st.render();
         return true;
       },
+      showing: (slug) => {
+        const e = stateRef.current?.slots.get(slug);
+        return e && e.texture !== undefined ? `${e.key}#${e.texture}` : '';
+      },
       has: (slug) => {
         const obj = stateRef.current?.slots.get(slug)?.obj;
         return !!obj && obj.children.length > 0;
@@ -272,6 +288,7 @@ export function PedViewport({
     });
 
     return () => {
+      for (const t of stateRef.current?.customTextures.values() ?? []) t.dispose();
       ro.disconnect();
       el.removeEventListener('pointerdown', down);
       el.removeEventListener('pointermove', move);
@@ -289,14 +306,30 @@ export function PedViewport({
     const loader = new GLTFLoader();
     const texLoader = new THREE.TextureLoader();
 
+    for (const [id, tex] of [...s.customTextures]) {
+      if (!(id.slice(0, id.lastIndexOf(':')) in customs)) {
+        tex.dispose();
+        s.customTextures.delete(id);
+      }
+    }
+
     for (const [slug, pick] of Object.entries(outfit)) {
-      const key = pick ? `${gender}/${slug}/${pick.drawable}` : '';
+      const piece = pick?.custom ? customs[pick.custom] : undefined;
+      const key = pick ? (pick.custom ? `custom:${pick.custom}` : `${gender}/${slug}/${pick.drawable}`) : '';
       const cur = s.slots.get(slug);
       const texUrl = pick ? `${slotUrl(gender, slug, pick)}/${pick.texture}.png` : '';
 
       if (cur && cur.key === key) {
-        if (pick) {
-          const p = applyTexture(cur.obj, texLoader, texUrl).then(s.render);
+        if (pick?.custom) {
+          if (piece) applyCustomTexture(cur.obj, s.renderer, s.customTextures, pick.custom, piece, pick.texture);
+          cur.texture = pick.texture;
+          s.render();
+        } else if (pick) {
+          const p = applyTexture(cur.obj, texLoader, texUrl).then(() => {
+            const live = s.slots.get(slug);
+            if (live?.key === key) live.texture = pick.texture;
+            s.render();
+          });
           track(s.pending, p);
         }
         continue;
@@ -307,6 +340,16 @@ export function PedViewport({
         s.slots.delete(slug);
       }
       if (!pick) continue;
+
+      if (pick.custom) {
+        if (!piece) continue;
+        const obj = buildCustom(piece.mesh);
+        applyCustomTexture(obj, s.renderer, s.customTextures, pick.custom, piece, pick.texture);
+        s.ped.add(obj);
+        s.slots.set(slug, { key, obj, texture: pick.texture });
+        s.render();
+        continue;
+      }
 
       const placeholder = new THREE.Group();
       s.slots.set(slug, { key, obj: placeholder });
@@ -324,11 +367,12 @@ export function PedViewport({
           });
           await applyTexture(gltf.scene, texLoader, texUrl);
           s.ped.add(gltf.scene);
-          s.slots.set(slug, { key, obj: gltf.scene });
+          s.slots.set(slug, { key, obj: gltf.scene, texture: pick.texture });
           s.render();
         })
         .catch(() => {
-          s.slots.delete(slug);
+          const live = s.slots.get(slug);
+          if (live?.key === key) live.texture = pick.texture;
         });
       track(s.pending, p);
     }
@@ -340,7 +384,7 @@ export function PedViewport({
         s.slots.delete(slug);
       }
     }
-  }, [gender, outfit]);
+  }, [gender, outfit, customs]);
 
   useEffect(() => {
     const s = stateRef.current;
@@ -399,6 +443,73 @@ async function applyTexture(root: THREE.Object3D, loader: THREE.TextureLoader, u
     if (m.isMesh) {
       const mat = m.material as THREE.MeshStandardMaterial;
       mat.map = tex;
+      mat.needsUpdate = true;
+    }
+  });
+}
+
+function buildCustom(mesh: ClothingMesh): THREE.Group {
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(mesh.positions, 3));
+  geometry.setAttribute('normal', new THREE.BufferAttribute(mesh.normals, 3));
+  geometry.setAttribute('uv', new THREE.BufferAttribute(mesh.uvs, 2));
+  geometry.setIndex(new THREE.BufferAttribute(mesh.indices, 1));
+  const m = new THREE.Mesh(
+    geometry,
+    new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0, alphaTest: 0.5, color: 0xffffff }),
+  );
+  m.frustumCulled = false;
+  const group = new THREE.Group();
+  group.add(m);
+  return group;
+}
+
+function customTexture(renderer: THREE.WebGLRenderer, source: ClothingTexture): THREE.Texture | null {
+  let tex: THREE.Texture;
+  if (source.kind === 'bc7') {
+    if (!renderer.extensions.has('EXT_texture_compression_bptc')) return null;
+    tex = new THREE.CompressedTexture(
+      [{ data: source.data, width: source.width, height: source.height }],
+      source.width,
+      source.height,
+      THREE.RGBA_BPTC_Format,
+    );
+    tex.minFilter = THREE.LinearFilter;
+    tex.generateMipmaps = false;
+  } else {
+    tex = new THREE.DataTexture(source.data, source.width, source.height, THREE.RGBAFormat);
+    tex.generateMipmaps = true;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+  }
+  tex.magFilter = THREE.LinearFilter;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.flipY = false;
+  tex.anisotropy = 4;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function applyCustomTexture(
+  root: THREE.Object3D,
+  renderer: THREE.WebGLRenderer,
+  cache: Map<string, THREE.Texture>,
+  id: string,
+  piece: CustomPiece,
+  index: number,
+) {
+  const source = piece.textures[index];
+  const cacheKey = `${id}:${index}`;
+  let tex = cache.get(cacheKey) ?? null;
+  if (!tex && source) {
+    tex = customTexture(renderer, source);
+    if (tex) cache.set(cacheKey, tex);
+  }
+  root.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (m.isMesh) {
+      const mat = m.material as THREE.MeshStandardMaterial;
+      mat.map = tex;
+      mat.color.set(tex ? 0xffffff : 0x8a8a8a);
       mat.needsUpdate = true;
     }
   });

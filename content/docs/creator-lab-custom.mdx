@@ -1,0 +1,124 @@
+---
+title: Your own clothing
+description: Add clothing files from your computer to the Creator Lab, put them on the ped and photograph them like the game's own clothing.
+---
+
+The Creator Lab can show clothing that is not in the game, such as your server's
+own clothing or a piece you are making. Add its files, and it goes on the real
+ped like any other item. Everything else works the same: Only the garment,
+backdrops, angles, framing and Capture view.
+
+Your files are read in your browser and never leave your computer.
+
+## What you need
+
+FiveM clothing comes as two kinds of file:
+
+| File | What it is | Example |
+| --- | --- | --- |
+| **.ydd** | The model: the shape of the piece | `jbib_000_u.ydd` |
+| **.ytd** | A texture: one colour or design of it | `jbib_diff_000_a_uni.ytd` |
+
+Add the model and as many of its textures as you like. Each texture becomes one
+colour you can switch between. They are usually in the resource's `stream`
+folder.
+
+<Callout type="warn" title="Escrowed clothing cannot be added">
+  Escrowed clothing is encrypted, and only FiveM can open it, on a server that
+  owns it. The Creator Lab reads the files in your browser, outside FiveM, so it
+  cannot open escrowed files. They are recognised and turned away with a short
+  explanation. To get pictures of escrowed clothing, take screenshots in game on
+  a green or magenta background and use [Key captures](/docs/key-captures).
+</Callout>
+
+## Add a piece
+
+<Steps>
+  <Step>
+    ### Open the window
+
+    In the Ped studio, press **Add your own clothing** at the top of the left
+    column.
+  </Step>
+  <Step>
+    ### Drop the files in
+
+    Drop the .ydd and its .ytd files on the window, drop the whole folder, or
+    click to choose them. You can add several pieces at once.
+  </Step>
+  <Step>
+    ### Check the ped and slot
+
+    Each piece shows its name, how many colours were found, and which ped and
+    slot it goes on. Both are read from the file names. Change them if they are
+    wrong. A slot outlined in amber means the name did not say, so pick it
+    yourself.
+  </Step>
+  <Step>
+    ### Add it
+
+    Press **Add and wear it**. The piece goes straight on the ped. If it was made
+    for the other ped, the studio switches to that ped first.
+  </Step>
+</Steps>
+
+## Use it
+
+Your pieces are listed under **Your clothing**:
+
+- **Wear** puts a piece back on the ped.
+- The box icon on a worn piece photographs **every colour** of it and saves one
+  ZIP, laid out as `{ped}/{slot}/{name}/{colour}`.
+- The bin icon removes the piece.
+
+In the outfit list, a slot wearing your piece shows its name. The counter next
+to it switches between its colours, and **Use game items** goes back to the
+game's clothing for that slot.
+
+**Capture view** names the picture after your piece, for example
+`clothingDB-jbib_000_u-2.webp` for its third colour.
+
+## How files are matched
+
+The Creator Lab reads FiveM's usual file names:
+
+```txt
+mp_m_freemode_01^jbib_000_u.ydd            male, Tops / Jackets, item 0
+mp_m_freemode_01^jbib_diff_000_a_uni.ytd   its first colour (a)
+mp_m_freemode_01^jbib_diff_000_b_uni.ytd   its second colour (b)
+```
+
+- The slot comes from the four letters at the start: `jbib` is Tops / Jackets,
+  `lowr` is Legs, `feet` is Shoes, `uppr` is Torsos, `accs` is Undershirts,
+  `berd` is Masks, `hair` is Hair, `teef` is Accessories, `task` is Armor,
+  `hand` is Bags and `decl` is Decals.
+- The ped comes from `mp_m_freemode_01` (male) or `mp_f_freemode_01` (female).
+  If the name does not say, the current ped is used.
+- Textures go with the model that has the same slot and number. Their letters
+  (a, b, c…) set the order of the colours.
+- If you add one model and its textures are named differently, all of them go
+  with that model.
+
+## What is not supported
+
+| File | Why |
+| --- | --- |
+| Escrowed (encrypted) files | They only open inside FiveM |
+| GTA V Enhanced files | They use a newer format that is not read yet |
+| Props: hats, glasses, watches | The Ped studio does not show props yet |
+| A model with no texture | It still works, but shows in plain grey |
+
+## Limits
+
+These keep your browser from freezing on a broken or oversized file. Normal
+clothing is far below all of them.
+
+| Limit | Size |
+| --- | --- |
+| One file | 64 MB |
+| One file once unpacked | 256 MB |
+| One texture | 4096 × 4096 pixels |
+| Clothing files read in one go | 200. Add the rest in another go |
+
+Some newer clothing uses a texture format (BC7) that a few browsers, mostly on
+phones, cannot display. On a computer it works in every major browser.
