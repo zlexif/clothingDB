@@ -1,13 +1,14 @@
 'use client';
 
 import { zipSync } from 'fflate';
-import { Camera, CircleHelp, Package, Square, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Camera, CircleHelp, Package, Plus, Square, Trash2, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { categoryBySlug, type Gender } from '../../lib/clothing';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
 import { Tour, type TourStep } from '../ui/tour';
 import { Field, Pills, Stepper } from './controls';
+import { AddClothingDialog, type CustomItem, CustomThumb } from './custom-clothing';
 import { GarmentSwitch } from './garment-switch';
 import {
   type Framing,
@@ -43,6 +44,13 @@ const ANGLES: { label: string; yaw: number }[] = [
 
 type Outfit = Record<string, SlotPick | null>;
 
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+async function until(check: () => boolean, timeoutMs = 8000) {
+  const start = performance.now();
+  while (!check() && performance.now() - start < timeoutMs) await nextFrame();
+}
+
 const TOUR_SEEN = 'clothingdb:ped-studio-tour';
 
 const TOUR: TourStep[] = [
@@ -77,6 +85,19 @@ const TOUR: TourStep[] = [
           The left counter picks the item, the right one its colour or pattern. The line underneath tells you how many
           there are.
         </p>
+      </>
+    ),
+  },
+  {
+    target: 'custom',
+    title: 'Bring your own clothing',
+    body: (
+      <>
+        <p>
+          Add a clothing model (.ydd) and its textures (.ytd) from your computer to photograph it here. Your files stay
+          on this computer.
+        </p>
+        <p>Escrowed (encrypted) clothing only opens inside FiveM, so it cannot be added.</p>
       </>
     ),
   },
@@ -174,6 +195,10 @@ export function PedStudio({ modeSwitch }: { modeSwitch: React.ReactNode }) {
   const handle = useRef<PedViewportHandle | null>(null);
   const cancel = useRef(false);
   const [tour, setTour] = useState(false);
+  const [customs, setCustoms] = useState<CustomItem[]>([]);
+  const [adding, setAdding] = useState(false);
+  const customById = useMemo(() => Object.fromEntries(customs.map((c) => [c.id, c])), [customs]);
+  const customPieces = useMemo(() => Object.fromEntries(customs.map((c) => [c.id, c.piece])), [customs]);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
@@ -221,6 +246,34 @@ export function PedStudio({ modeSwitch }: { modeSwitch: React.ReactNode }) {
   const counts = (slot: string) => m?.slots[slot]?.drawables ?? [];
   const maxDrawable = (slot: string) => Math.max(0, counts(slot).length - 1);
   const maxTexture = (slot: string, d: number) => Math.max(0, (counts(slot)[d] ?? 1) - 1);
+  const customColours = (id: string) => customById[id]?.piece.textures.length ?? 0;
+
+  function wearCustom(item: CustomItem) {
+    const pick: SlotPick = { drawable: -1, texture: 0, custom: item.id };
+    if (item.gender !== gender) {
+      setGender(item.gender);
+      setOutfit({ ...BASE_OUTFIT, [item.slot]: pick });
+    } else {
+      setOutfit((o) => ({ ...o, [item.slot]: pick }));
+    }
+    setPieceSlot(item.slot as Slot);
+  }
+
+  function addCustoms(items: CustomItem[]) {
+    setCustoms((c) => [...c, ...items]);
+    setAdding(false);
+    if (items[0]) wearCustom(items[0]);
+  }
+
+  function removeCustom(id: string) {
+    setCustoms((c) => c.filter((x) => x.id !== id));
+    setOutfit((o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v?.custom === id ? null : v])));
+  }
+
+  function customColour(slot: string, p: SlotPick, t: number) {
+    const last = Math.max(0, customColours(p.custom ?? '') - 1);
+    setOutfit((o) => ({ ...o, [slot]: { ...p, texture: Math.min(Math.max(0, t), last) } }));
+  }
 
   function pick(slot: string, patch: Partial<SlotPick> | null) {
     if (patch !== null) setPieceSlot(slot as Slot);
@@ -256,12 +309,48 @@ export function PedStudio({ modeSwitch }: { modeSwitch: React.ReactNode }) {
   async function captureView() {
     if (!handle.current) return;
     const blob = await handle.current.capture(size, mime);
+    const own = piece?.custom ? customById[piece.custom] : undefined;
     save(
       blob,
-      pieceOnly && piece
-        ? `clothingDB-${gender}-${pieceSlot}-${piece.drawable}-${piece.texture}.${ext}`
-        : `clothingDB-${gender}-${Date.now()}.${ext}`,
+      pieceOnly && own && piece
+        ? `clothingDB-${own.name}-${piece.texture}.${ext}`
+        : pieceOnly && piece
+          ? `clothingDB-${gender}-${pieceSlot}-${piece.drawable}-${piece.texture}.${ext}`
+          : `clothingDB-${gender}-${Date.now()}.${ext}`,
     );
+  }
+
+  async function runCustomBatch(item: CustomItem) {
+    if (!handle.current) return;
+    const total = Math.max(1, item.piece.textures.length);
+    const base = item.gender === gender ? outfit : BASE_OUTFIT;
+    if (item.gender !== gender) setGender(item.gender);
+    cancel.current = false;
+    setProgress({ done: 0, total });
+    setFocus(item.slot);
+    const files: Record<string, Uint8Array> = {};
+    try {
+      for (let t = 0; t < total; t++) {
+        if (cancel.current) break;
+        const job: SlotPick = { drawable: -1, texture: t, custom: item.id };
+        setOutfit(garmentOnly ? { [item.slot]: job } : { ...base, [item.slot]: job });
+        await until(() => handle.current?.showing(item.slot) === `custom:${item.id}#${t}`);
+        await handle.current.ready();
+        const blob = await handle.current.capture(size, mime);
+        files[`${item.gender}/${item.slot}/${item.name}/${t}.${ext}`] = new Uint8Array(await blob.arrayBuffer());
+        setProgress({ done: t + 1, total });
+      }
+      if (Object.keys(files).length)
+        save(
+          new Blob([zipSync(files, { level: 0 }) as BlobPart], { type: 'application/zip' }),
+          `clothingDB-${item.name}.zip`,
+        );
+    } finally {
+      setOutfit({ ...base, [item.slot]: { drawable: -1, texture: 0, custom: item.id } });
+      setPieceSlot(item.slot as Slot);
+      setFocus(null);
+      setProgress(null);
+    }
   }
 
   async function runBatch() {
@@ -283,7 +372,7 @@ export function PedStudio({ modeSwitch }: { modeSwitch: React.ReactNode }) {
         if (cancel.current) break;
         const job = jobs[i];
         setOutfit(garmentOnly ? { [slot]: job } : { ...before, [slot]: job });
-        await new Promise((r) => setTimeout(r, 0));
+        await until(() => handle.current?.showing(slot) === `${gender}/${slot}/${job.drawable}#${job.texture}`);
         await handle.current.ready();
         const blob = await handle.current.capture(size, mime);
         files[`${gender}/${slot}/${job.drawable}/${job.texture}.${ext}`] = new Uint8Array(await blob.arrayBuffer());
@@ -341,6 +430,7 @@ export function PedStudio({ modeSwitch }: { modeSwitch: React.ReactNode }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Tour steps={TOUR} open={tour} onClose={closeTour} />
+      <AddClothingDialog open={adding} gender={gender} onClose={() => setAdding(false)} onAdd={addCustoms} />
       {header}
       <div className="grid min-h-0 flex-1 lg:grid-cols-[300px_minmax(0,1fr)_300px] lg:overflow-hidden">
         <aside className="flex flex-col gap-5 border-b border-hairline p-5 lg:min-h-0 lg:border-b-0 lg:border-r">
@@ -356,6 +446,85 @@ export function PedStudio({ modeSwitch }: { modeSwitch: React.ReactNode }) {
                 }}
               />
             </Field>
+          </div>
+          <div data-tour="custom" className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-[13px] text-fg-2">Your clothing</p>
+              {customs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setAdding(true)}
+                  className="press flex items-center gap-1 rounded-full px-2 py-0.5 text-[13px] text-fg-2 hover:bg-elevated hover:text-fg"
+                >
+                  <Plus size={13} /> Add
+                </button>
+              )}
+            </div>
+            {customs.length === 0 ? (
+              <button
+                type="button"
+                onClick={() => setAdding(true)}
+                disabled={!m}
+                className="press flex w-full items-center gap-3 rounded-2xl border border-dashed border-hairline-strong p-3 text-left hover:border-fg-3 disabled:opacity-50"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-elevated text-fg-2">
+                  <Plus size={16} />
+                </span>
+                <span>
+                  <span className="block text-[14px] text-fg">Add your own clothing</span>
+                  <span className="block text-[12px] text-fg-3">.ydd and .ytd files, not escrowed</span>
+                </span>
+              </button>
+            ) : (
+              <ul className="space-y-1.5">
+                {customs.map((c) => {
+                  const worn = outfit[c.slot]?.custom === c.id;
+                  return (
+                    <li key={c.id} className="flex items-center gap-2.5 rounded-2xl border border-hairline p-2">
+                      <CustomThumb item={c} className="h-9 w-9" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[13px] text-fg">{c.name}</span>
+                        <span className="block truncate text-[12px] text-fg-3">
+                          {categoryBySlug(c.slot)?.label ?? c.slot}
+                          {c.gender !== gender ? ` · for the ${c.gender} ped` : ''}
+                        </span>
+                      </span>
+                      {worn ? (
+                        <button
+                          type="button"
+                          aria-label={`Capture every colour of ${c.name}`}
+                          title="Capture every colour"
+                          onClick={() => void runCustomBatch(c)}
+                          disabled={!!progress}
+                          className="press flex h-7 w-7 items-center justify-center rounded-full text-fg-2 hover:bg-elevated hover:text-fg disabled:opacity-40"
+                        >
+                          <Package size={14} />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => wearCustom(c)}
+                          disabled={!!progress}
+                          className="press rounded-full px-2.5 py-0.5 text-[13px] text-fg-2 hover:bg-elevated hover:text-fg"
+                        >
+                          Wear
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        aria-label={`Remove ${c.name}`}
+                        title="Remove"
+                        onClick={() => removeCustom(c.id)}
+                        disabled={!!progress}
+                        className="press flex h-7 w-7 items-center justify-center rounded-full text-fg-3 hover:bg-elevated hover:text-fg disabled:opacity-40"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
           <div data-tour="outfit" className="flex flex-col gap-2 lg:min-h-0 lg:flex-1">
             <p className="text-[13px] text-fg-2">Outfit</p>
@@ -389,7 +558,32 @@ export function PedStudio({ modeSwitch }: { modeSwitch: React.ReactNode }) {
                         </button>
                       )}
                     </div>
-                    {p && (
+                    {p?.custom && (
+                      <div className="mt-2 grid grid-cols-2 gap-2">
+                        <span className="flex h-9 min-w-0 items-center rounded-full border border-ember/60 px-3 text-[13px] text-fg">
+                          <span className="truncate">{customById[p.custom]?.name ?? 'Your item'}</span>
+                        </span>
+                        <Stepper
+                          label={`${label} colour`}
+                          value={p.texture}
+                          onChange={(v) => customColour(slot, p, v)}
+                        />
+                        <span className="col-span-2 flex items-center justify-between gap-2 px-1 text-[12px] text-fg-3">
+                          <span>
+                            Your item, {Math.max(1, customColours(p.custom))}{' '}
+                            {customColours(p.custom) === 1 ? 'colour' : 'colours'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => pick(slot, { drawable: 0, texture: 0 })}
+                            className="text-fg-2 underline-offset-2 hover:text-fg hover:underline"
+                          >
+                            Use game items
+                          </button>
+                        </span>
+                      </div>
+                    )}
+                    {p && !p.custom && (
                       <div className="mt-2 grid grid-cols-2 gap-2">
                         <Stepper
                           label={`${label} drawable`}
@@ -425,6 +619,7 @@ export function PedStudio({ modeSwitch }: { modeSwitch: React.ReactNode }) {
               className="absolute inset-0"
               gender={gender}
               outfit={viewOutfit}
+              customs={customPieces}
               backdrop={backdrop}
               framing={framing}
               yaw={yaw}
